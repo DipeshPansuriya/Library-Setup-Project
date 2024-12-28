@@ -3,10 +3,14 @@ name: .NET Core
 on:
   push:
     branches:
-      - '**'
+      - main
+      - release/*
+      - feature/*
   pull_request:
     branches:
-      - '**'
+      - main
+      - release/*
+      - feature/*
 
 jobs:
   build:
@@ -15,31 +19,11 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
-    - name: Install dependencies
-      run: sudo apt-get install -y libssl-dev
-
+    
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: '5.0.x'
-
-    - name: Determine Version
-      id: version
-      run: |
-        MAJOR=1
-        MINOR=0
-        PATCH=1
-        if [[ $GITHUB_REF == refs/heads/feature/* ]]; then
-          VERSION="${MAJOR}.${MINOR}.${PATCH}-feature.${GITHUB_RUN_ID}"
-        elif [[ $GITHUB_REF == refs/heads/main ]]; then
-          VERSION="${MAJOR}.${MINOR}.${PATCH}-main.${GITHUB_RUN_ID}"
-        elif [[ $GITHUB_REF == refs/heads/release/* ]]; then
-          VERSION="${MAJOR}.${MINOR}.${PATCH}"
-        else
-          VERSION="${MAJOR}.${MINOR}.${PATCH}-anotherbranch.${GITHUB_RUN_ID}"
-        fi
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        dotnet-version: '9.0.x'
 
     - name: Restore dependencies
       run: dotnet restore
@@ -47,8 +31,8 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
 
-    #- name: Run tests
+    # - name: Run tests
     #  run: dotnet test --no-restore --verbosity normal
 
     - name: Pack
-      run: dotnet pack --no-build --output ./nupkg /p:PackageVersion=${{ env.VERSION }}
+      run: dotnet pack
