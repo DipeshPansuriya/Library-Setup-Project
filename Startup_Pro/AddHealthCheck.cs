@@ -8,18 +8,18 @@ namespace InfraLib.Startup_Pro
 {
     public static class AddHealthCheck
     {
-        public static void Builder(WebApplicationBuilder builder, List<string> sqlhelthcheck = null, bool hangfire = false)
+        public static void Builder(WebApplicationBuilder builder, List<(string connectionString, string name)> sqlHealthChecks = null, bool hangfire = false)
         {
             IHealthChecksBuilder healthChecksBuilder = builder.Services.AddHealthChecks();
 
-            if (sqlhelthcheck != null)
+            if (sqlHealthChecks != null)
             {
-                foreach (string sql in sqlhelthcheck)
+                foreach ((string connectionString, string name) in sqlHealthChecks)
                 {
                     _ = healthChecksBuilder.AddSqlServer(
-                        sql,
+                        connectionString,
                         healthQuery: "SELECT 1;",
-                        name: sql);
+                        name: name);
                 }
             }
 
