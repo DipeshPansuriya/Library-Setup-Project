@@ -29,10 +29,7 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --no-restore
-
-    # - name: Run tests
-    #  run: dotnet test --no-restore --verbosity normal
+      run: dotnet build --configuration Release --no-restore
 
     - name: Determine Version
       id: version
@@ -41,13 +38,13 @@ jobs:
         MINOR=0
         PATCH=1
         if [[ $GITHUB_REF == refs/heads/feature/* ]]; then
-          VERSION="${MAJOR}.${MINOR}.${PATCH}-feature.${GITHUB_RUN_ID}"
+          VERSION="${MAJOR}.${MINOR}.${PATCH}.feature.${GITHUB_RUN_ID}"
         elif [[ $GITHUB_REF == refs/heads/main ]]; then
-          VERSION="${MAJOR}.${MINOR}.${PATCH}-main.${GITHUB_RUN_ID}"
+          VERSION="${MAJOR}.${MINOR}.${PATCH}.main.${GITHUB_RUN_ID}"
         elif [[ $GITHUB_REF == refs/heads/release/* ]]; then
           VERSION="${MAJOR}.${MINOR}.${PATCH}"
         else
-          VERSION="${MAJOR}.${MINOR}.${PATCH}-anotherbranch.${GITHUB_RUN_ID}"
+          VERSION="${MAJOR}.${MINOR}.${PATCH}.anotherbranch.${GITHUB_RUN_ID}"
         fi
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         
