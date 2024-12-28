@@ -36,7 +36,7 @@ jobs:
       run: |
         MAJOR=1
         MINOR=0
-        PATCH=1
+        PATCH=2
         if [[ $GITHUB_REF == refs/heads/feature/* ]]; then
           VERSION="${MAJOR}.${MINOR}.${PATCH}-feature.${GITHUB_RUN_ID}"
         elif [[ $GITHUB_REF == refs/heads/main ]]; then

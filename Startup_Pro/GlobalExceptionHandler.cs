@@ -1,48 +1,60 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="GlobalExceptionHandler.cs" company="">
-//     Author:  
-//     Copyright (c) . All rights reserved.
-// </copyright>
-//-----------------------------------------------------------------------
-using Microsoft.AspNetCore.Diagnostics;
+﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace InfraLib.Startup_Pro
 {
     public class GlobalExceptionHandler : IExceptionHandler
     {
-        private readonly ILogger<GlobalExceptionHandler> _logger;
-
-        public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
-        {
-            _logger = logger;
-        }
-
         public async ValueTask<bool> TryHandleAsync(
             HttpContext httpContext,
             Exception exception,
             CancellationToken cancellationToken)
         {
-            _logger.LogError(
-                exception,
-                //ConsoleMessages.ExceptionOccurred,
-                exception.Message,
-                exception.InnerException?.Message);
+            // Log the exception details using Serilog
+            LogException(exception);
 
-            ProblemDetails problemDetails = new()
+            // Determine the status code based on the exception type
+            int statusCode = exception switch
             {
-                Status = StatusCodes.Status500InternalServerError,
-                Title = "Server error"
+                ArgumentException => StatusCodes.Status400BadRequest,
+                UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
+                _ => StatusCodes.Status500InternalServerError
             };
 
-            httpContext.Response.StatusCode = problemDetails.Status.Value;
+            // Create problem details
+            ProblemDetails problemDetails = new()
+            {
+                Status = statusCode,
+                Title = "An error occurred while processing your request.",
+                Detail = exception.Message,
+                Instance = httpContext.Request.Path
+            };
 
-            await httpContext.Response
-                .WriteAsJsonAsync(problemDetails, cancellationToken);
+            // Set the response status code and content type
+            httpContext.Response.StatusCode = statusCode;
+            httpContext.Response.ContentType = "application/problem+json";
+
+            // Write the problem details to the response
+            await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
 
             return true;
         }
+
+        private void LogException(Exception exception)
+        {
+            // Log the main exception using Serilog
+            Log.Error(exception, "An error occurred: {Message}", exception.Message);
+
+            // Log inner exceptions if they exist
+            Exception innerException = exception.InnerException;
+            while (innerException != null)
+            {
+                Log.Error(innerException, "Inner exception: {Message}", innerException.Message);
+                innerException = innerException.InnerException;
+            }
+        }
     }
 }
+

@@ -11,7 +11,7 @@ namespace InfraLib.Startup_Pro
 {
     public static class AddTelemetry
     {
-        public static void Builder(WebApplicationBuilder builder, string serviceName)
+        public static void Builder(WebApplicationBuilder builder, string serviceName, bool isdevenv = false)
         {
             _ = builder.Logging.AddOpenTelemetry(options =>
             {
@@ -28,7 +28,7 @@ namespace InfraLib.Startup_Pro
                 .ConfigureResource(resource => resource.AddService(serviceName))
                 .WithTracing(tracing =>
                 {
-                    if (AppSettings.EnvironmentName.ToLower() == "dev")
+                    if (!isdevenv)
                     {
                         _ = tracing.SetSampler<AlwaysOnSampler>();
                     }
@@ -46,7 +46,7 @@ namespace InfraLib.Startup_Pro
                         "Microsoft.AspNetCore.Hosting",
                         "Microsoft.AspNetCore.Server.Kestrel",
                         "System.Net.Http",
-                        "Masters_API"
+                        builder.Environment.ApplicationName
                         )
                     .AddHttpClientInstrumentation()
                     .AddSqlClientInstrumentation();

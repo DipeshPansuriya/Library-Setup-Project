@@ -8,43 +8,45 @@ namespace InfraLib.Startup_Pro
 {
     public static class AddHealthCheck
     {
-        public static void Builder(WebApplicationBuilder builder)
+        public static void Builder(WebApplicationBuilder builder, List<(string connectionString, string name)> sqlHealthChecks = null, bool hangfire = false)
         {
-            _ = builder.Services
-                .AddHealthChecks()
-                .AddSqlServer(
-                    AppSettings.dbSettings.MastersDb,
-                    healthQuery: "SELECT 1;",
-                    name: "Masters Database")
-                .AddSqlServer(
-                    AppSettings.dbSettings.MastersLogDb,
-                    healthQuery: "SELECT 1;",
-                    name: "Master Log Database")
-                .AddSqlServer(
-                    AppSettings.dbSettings.MastersHangfireDb,
-                    healthQuery: "SELECT 1;",
-                    name: "Master Hangfire Database")
-                .AddHangfire(
+            IHealthChecksBuilder healthChecksBuilder = builder.Services.AddHealthChecks();
+
+            if (sqlHealthChecks != null)
+            {
+                foreach ((string connectionString, string name) in sqlHealthChecks)
+                {
+                    _ = healthChecksBuilder.AddSqlServer(
+                        connectionString,
+                        healthQuery: "SELECT 1;",
+                        name: name);
+                }
+            }
+
+            if (hangfire)
+            {
+                _ = healthChecksBuilder.AddHangfire(
                     setup => setup.MaximumJobsFailed = 5,
                     name: "Hangfire",
-                    failureStatus: HealthStatus.Unhealthy)
-                .AddProcessAllocatedMemoryHealthCheck(
+                    failureStatus: HealthStatus.Unhealthy);
+            }
+
+            AddDefaultHealthChecks(builder, healthChecksBuilder);
+        }
+
+        public static void Builder(WebApplicationBuilder builder, bool hangfire = false)
+        {
+            Builder(builder, null, hangfire);
+        }
+
+        private static void AddDefaultHealthChecks(WebApplicationBuilder builder, IHealthChecksBuilder healthChecksBuilder)
+        {
+            _ = healthChecksBuilder
+                  .AddProcessAllocatedMemoryHealthCheck(
                     maximumMegabytesAllocated: 500,
                     name: "Memory",
                     failureStatus: HealthStatus.Degraded,
                     tags: new[] { "server", "memory" });
-
-
-            //.AddPrivateMemoryHealthCheck(
-            //    maximumMegabytesThreshold: 1000, // setting the threshold correctly in MB
-            //    name: "Private Memory",
-            //    failureStatus: HealthStatus.Degraded,
-            //    tags: new[] { "server", "memory" });
-            //.AddUrlGroup(
-            //    new Uri("https://yourapi.com/health"),
-            //    name: "API",
-            //    failureStatus: HealthStatus.Unhealthy,
-            //    tags: new[] { "external", "api" });
 
             _ = builder.Services
                 .AddHealthChecksUI(setupSettings: setup => setup.AddHealthCheckEndpoint("Health Checks", "/health"))
