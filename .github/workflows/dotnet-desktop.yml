@@ -50,3 +50,8 @@ jobs:
         
     - name: Pack
       run: dotnet pack --no-build --output ./nupkg /p:PackageVersion=${{ env.VERSION }}
+      
+    - name: Publish to NuGet
+      run: dotnet nuget push ./nupkg/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
