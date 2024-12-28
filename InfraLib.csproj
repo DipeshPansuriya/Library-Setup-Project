@@ -3,6 +3,11 @@
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<Description>Infra Lib to Setup your Startup File</Description>
+		<Authors>Dipesh Pansuriya</Authors>
+		<RepositoryUrl>https://github.com/DipeshPansuriya/Library-Setup-Project/tree/main</RepositoryUrl>
+		<RepositoryType>'git'</RepositoryType>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	</PropertyGroup>
 
 	<ItemGroup>
