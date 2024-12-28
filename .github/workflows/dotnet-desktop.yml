@@ -52,4 +52,4 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         
     - name: Pack
-      run: dotnet pack
+      run: dotnet pack --no-build --output ./nupkg /p:PackageVersion=${{ env.VERSION }}
