@@ -8,6 +8,8 @@
 		<RepositoryUrl>https://github.com/DipeshPansuriya/Library-Setup-Project/tree/main</RepositoryUrl>
 		<RepositoryType>'git'</RepositoryType>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Title>Setup Startup File</Title>
+		<PackageProjectUrl>https://github.com/DipeshPansuriya/Library-Setup-Project/tree/main</PackageProjectUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
