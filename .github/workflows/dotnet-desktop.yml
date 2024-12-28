@@ -3,14 +3,10 @@ name: .NET Core
 on:
   push:
     branches:
-      - main
-      - release/*
-      - feature/*
+      - '**'
   pull_request:
     branches:
-      - main
-      - release/*
-      - feature/*
+      - '**'
 
 jobs:
   build:
@@ -32,13 +28,13 @@ jobs:
         MINOR=0
         PATCH=1
         if [[ $GITHUB_REF == refs/heads/feature/* ]]; then
-          VERSION="feature_${MAJOR}.${MINOR}.${PATCH}_${GITHUB_RUN_ID}"
+          VERSION="${MAJOR}.${MINOR}.${PATCH}-feature.${GITHUB_RUN_ID}"
         elif [[ $GITHUB_REF == refs/heads/main ]]; then
-          VERSION="main_${MAJOR}.${MINOR}.${PATCH}_${GITHUB_RUN_ID}"
+          VERSION="${MAJOR}.${MINOR}.${PATCH}-main.${GITHUB_RUN_ID}"
         elif [[ $GITHUB_REF == refs/heads/release/* ]]; then
           VERSION="${MAJOR}.${MINOR}.${PATCH}"
         else
-          VERSION="anotherbranch_${MAJOR}.${MINOR}.${PATCH}_${GITHUB_RUN_ID}"
+          VERSION="${MAJOR}.${MINOR}.${PATCH}-anotherbranch.${GITHUB_RUN_ID}"
         fi
         echo "VERSION=$VERSION" >> $GITHUB_ENV
 
@@ -48,7 +44,7 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
 
-    # - name: Run tests
+    #- name: Run tests
     #  run: dotnet test --no-restore --verbosity normal
 
     - name: Pack
