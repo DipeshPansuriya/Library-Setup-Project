@@ -13,19 +13,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Startup_Pro\Cache\**" />
-	  <Compile Remove="Startup_Pro\MessagingQuee\**" />
-	  <Compile Remove="Startup_Pro\SignalR\**" />
-	  <EmbeddedResource Remove="Startup_Pro\Cache\**" />
-	  <EmbeddedResource Remove="Startup_Pro\MessagingQuee\**" />
-	  <EmbeddedResource Remove="Startup_Pro\SignalR\**" />
-	  <None Remove="Startup_Pro\Cache\**" />
-	  <None Remove="Startup_Pro\MessagingQuee\**" />
-	  <None Remove="Startup_Pro\SignalR\**" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Compile Remove="Startup_Pro\AddRateLimit.cs" />
+	  <None Include=".github\workflows\dotnet-desktop.yml" />
 	</ItemGroup>
 
 	<ItemGroup>
