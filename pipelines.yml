@@ -1,0 +1,59 @@
+---
+
+trigger:
+- main
+- feature/*
+- release/*
+
+# Trigger build when PR is raised
+# pr:
+#   branches:
+#     include:
+#     - main
+#     - develop
+#     - release/*
+#     - feature/*
+#     - hotfix/*
+
+
+variables:
+  - name: major
+    value: 1
+  - name: minor
+    value: 2
+  - name: patchversion
+    value: 11
+  - name: buildId
+    value: $(Build.BuildId)
+  - name: versionPrefix
+    ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/feature/') }}:
+      value: '-feature-$(Build.BuildId)'
+    ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/hotfix/') }}:
+      value: '-hotfix-$(Build.BuildId)'
+    ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+      value: '-main-$(Build.BuildId)'
+    ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/')) }}:
+      value: '-no-version-$(Build.BuildId)'
+    ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/release/') }}:
+      value: ''
+  - name: version
+    value: $(major).$(minor).$(patchversion)$(versionPrefix)
+
+pool: 
+  # name: 'Deployment-Agent-WinOS-2'
+  vmImage: 'windows-latest'
+
+steps:
+  - task: UseDotNet@2
+    displayName: Install .Net 9
+    inputs:
+      packageType: sdk
+      version: 9.0.x
+      installationPath: $(Agent.ToolsDirectory)/dotnet
+
+  - task: DotNetCoreCLI@2
+    displayName: Build Project
+    inputs:
+      command: 'build'
+      arguments: '--configuration Release /p:Version=$(version)'
+      
