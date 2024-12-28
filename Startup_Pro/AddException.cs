@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using System.Net;
 using System.Text;
 
@@ -20,11 +21,12 @@ namespace InfraLib.Startup_Pro
                 new ExceptionHandlerOptions
                 {
                     ExceptionHandler =
-                        (c) =>
+                        async (c) =>
                         {
-                            IExceptionHandlerFeature exception = c.Features
+                            IExceptionHandlerFeature exceptionFeature = c.Features
                                 .Get<IExceptionHandlerFeature>();
-                            HttpStatusCode statusCode = exception.Error.GetType().Name switch
+                            Exception exception = exceptionFeature?.Error;
+                            HttpStatusCode statusCode = exception?.GetType().Name switch
                             {
                                 "ArgumentException" => HttpStatusCode.BadRequest,
                                 _ => HttpStatusCode.ServiceUnavailable
@@ -32,13 +34,17 @@ namespace InfraLib.Startup_Pro
 
                             c.Response.StatusCode = (int)statusCode;
 
-                            byte[] content = (AppSettings.EnvironmentName.ToLower() != "dev")
-                                ? Encoding.UTF8.GetBytes($"Error [{exception.Error.Message}]")
-                                : Encoding.UTF8
-                                            .GetBytes($"Error : Kindly contact system administrator.");
-                            _ = c.Response.Body.WriteAsync(content, 0, content.Length);
+                            byte[] content = Encoding.UTF8.GetBytes($"Error [{exception?.Message}]");
+                            await c.Response.Body.WriteAsync(content, 0, content.Length);
 
-                            return Task.CompletedTask;
+                            if (exception != null)
+                            {
+                                Log.Error(exception, "An error occurred: {Message}", exception.Message);
+                                if (exception.InnerException != null)
+                                {
+                                    Log.Error(exception.InnerException, "Inner exception: {Message}", exception.InnerException.Message);
+                                }
+                            }
                         }
                 });
         }

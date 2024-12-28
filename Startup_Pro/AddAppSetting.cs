@@ -9,66 +9,72 @@ namespace InfraLib.Startup_Pro
 {
     public static class AddAppSetting
     {
-        public static void SetAppSettings(WebApplicationBuilder builder)
+        public static AppSettings SetAppSettings(WebApplicationBuilder builder)
         {
+            AppSettings appSettings = new();
             DBSettings dbconfig = new();
             builder.Configuration.Bind("DBSettings", dbconfig);
 
             HangfireSettings hangfireconfig = new();
             builder.Configuration.Bind("HangfireSettings", hangfireconfig);
 
-            AppSettings.dbSettings = dbconfig;
+            appSettings.dbSettings = dbconfig;
 
-            SqlConnectionStringBuilder masterdb = new(AppSettings.dbSettings.MastersDb);
-            AppSettings.dbSettings.MastersDb = masterdb.InitialCatalog;
+            SqlConnectionStringBuilder masterdb = new(appSettings.dbSettings.MastersDb);
+            appSettings.dbSettings.MastersDb = masterdb.InitialCatalog;
 
-            SqlConnectionStringBuilder masterlogdb = new(AppSettings.dbSettings.MastersLogDb);
-            AppSettings.dbSettings.MastersLogDbName = masterlogdb.InitialCatalog;
+            SqlConnectionStringBuilder masterlogdb = new(appSettings.dbSettings.MastersLogDb);
+            appSettings.dbSettings.MastersLogDbName = masterlogdb.InitialCatalog;
 
-            SqlConnectionStringBuilder masterhangfiredb = new(AppSettings.dbSettings.MastersHangfireDb);
-            AppSettings.dbSettings.MastersLogDbName = masterhangfiredb.InitialCatalog;
+            SqlConnectionStringBuilder masterhangfiredb = new(appSettings.dbSettings.MastersHangfireDb);
+            appSettings.dbSettings.MastersLogDbName = masterhangfiredb.InitialCatalog;
 
-            AppSettings.hangfireSettings = hangfireconfig;
+            appSettings.hangfireSettings = hangfireconfig;
 
-            AppSettings.EnvironmentName = builder.Environment.EnvironmentName.ToLower().Contains("dev")
+            appSettings.EnvironmentName = builder.Environment.EnvironmentName.ToLower().Contains("dev")
                 ? "dev"
                 : builder.Environment.EnvironmentName.ToLower();
 
-            AppSettings.ServicesWWWRoot = string.IsNullOrWhiteSpace(builder.Environment.WebRootPath)
+            appSettings.ServicesWWWRoot = string.IsNullOrWhiteSpace(builder.Environment.WebRootPath)
                 ? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")
                 : builder.Environment.WebRootPath;
 
-            AppSettings.ApplicationName = builder.Environment.ApplicationName;
+            appSettings.ApplicationName = builder.Environment.ApplicationName;
 
-            AppSettings.AllowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+            appSettings.AllowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+            return appSettings;
         }
 
-        public static void SetServicesURL(WebApplication app)
+        public static string SetServicesURL(WebApplication app)
         {
+            string url = string.Empty;
             _ = app.Lifetime.ApplicationStarted
                 .Register(
                     () =>
                     {
                         Console.WriteLine("Application has started!");
 
-                        LogApplicationUrls(app);
+                        url = LogApplicationUrls(app);
                     });
+            return url;
         }
 
-        private static void LogApplicationUrls(WebApplication app)
+        private static string LogApplicationUrls(WebApplication app)
         {
             IServer server = app.Services.GetRequiredService<IServer>();
             IServerAddressesFeature addresses = server.Features.Get<IServerAddressesFeature>();
-
+            string url = string.Empty;
             if (addresses != null)
             {
                 Console.WriteLine("Application URLs:");
+
                 foreach (string address in addresses.Addresses)
                 {
                     Console.WriteLine(address);
-                    AppSettings.ServicesAPIURL = address;
+                    url = address;
                 }
             }
+            return url;
         }
     }
 }

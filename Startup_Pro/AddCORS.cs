@@ -6,22 +6,26 @@ namespace InfraLib.Startup_Pro
 {
     public static class AddCORS
     {
-        public static void Builder(WebApplicationBuilder builder)
+        public static void Builder(WebApplicationBuilder builder, string[] AllowedOrigins)
         {
             _ = builder.Services
                 .AddCors(
                     options => options.AddPolicy(
                         "CorsPolicy",
-                        builder => builder.WithOrigins(AppSettings.AllowedOrigins)
+                        builder => builder.WithOrigins(AllowedOrigins)
                             .AllowAnyMethod()
                             .AllowAnyHeader()
                             .WithExposedHeaders("X-Pagination")));
         }
 
+        public static void Builder(WebApplicationBuilder builder)
+        {
+            Builder(builder, new string[] { "*" });
+        }
+
         public static void App(WebApplication app)
         {
             _ = app.UseCors("CorsPolicy");
-
 
             _ = app.Use(
                 async (context, next) =>

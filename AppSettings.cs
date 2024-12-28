@@ -2,21 +2,21 @@
 {
     public class AppSettings
     {
-        public static string[] AllowedOrigins { get; set; }
+        public string[] AllowedOrigins { get; set; }
 
-        public static string ServicesAPIURL { get; set; }
+        public string ServicesAPIURL { get; set; }
 
-        public static string ServicesWWWRoot { get; set; }
+        public string ServicesWWWRoot { get; set; }
 
-        public static string EnvironmentName { get; set; }
+        public string EnvironmentName { get; set; }
 
-        public static string ApplicationName { get; set; }
+        public string ApplicationName { get; set; }
 
-        public static string SeqURL { get; set; }
+        public string SeqURL { get; set; }
 
-        public static DBSettings dbSettings { get; set; }
+        public DBSettings dbSettings { get; set; }
 
-        public static HangfireSettings hangfireSettings { get; set; }
+        public HangfireSettings hangfireSettings { get; set; }
     }
 
     public class DBSettings

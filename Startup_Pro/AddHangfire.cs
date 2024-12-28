@@ -7,7 +7,7 @@ namespace InfraLib.Startup_Pro
 {
     public static class AddHangFire
     {
-        public static void Builder(WebApplicationBuilder builder)
+        public static void Builder(WebApplicationBuilder builder, string dbname)
         {
             _ = builder.Services
                 .AddHangfire(
@@ -16,7 +16,7 @@ namespace InfraLib.Startup_Pro
                         .UseSimpleAssemblyNameTypeSerializer()
                         .UseRecommendedSerializerSettings()
                         .UseSqlServerStorage(
-                            AppSettings.dbSettings.MastersHangfireDb,
+                            dbname,
                             new SqlServerStorageOptions
                             {
                                 CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
@@ -24,21 +24,21 @@ namespace InfraLib.Startup_Pro
                                 QueuePollInterval = TimeSpan.Zero,
                                 UseRecommendedIsolationLevel = true,
                                 DisableGlobalLocks = true,
-                                SchemaName = $"{AppSettings.ApplicationName}_Hangfire"
+                                SchemaName = $"{builder.Environment.ApplicationName}_Hangfire"
                             }));
 
             _ = builder.Services.AddHangfireServer();
         }
 
-        public static void App(WebApplication app)
+        public static string App(WebApplication app, string AccessUserId, string AccessPassword, string apiurl)
         {
-            ConfigureHangfireServices(app);
+            return ConfigureHangfireServices(app, AccessUserId, AccessPassword, apiurl);
         }
 
-        private static void ConfigureHangfireServices(WebApplication app)
+        private static string ConfigureHangfireServices(WebApplication app, string AccessUserId, string AccessPassword, string apiurl)
         {
             _ = app.UseHangfireDashboard(
-                $"/{AppSettings.ApplicationName}_hangfire",
+                $"/{app.Environment.ApplicationName}_hangfire",
                 new DashboardOptions
                 {
                     Authorization =
@@ -55,16 +55,14 @@ namespace InfraLib.Startup_Pro
                                                         {
                                                             new BasicAuthAuthorizationUser
                                                             {
-                                                                Login = AppSettings.hangfireSettings.Accessid,
-                                                                PasswordClear =
-                                                                    AppSettings.hangfireSettings.Accesspwd
-                                                            }
+                                                                Login = AccessUserId,
+                                                                PasswordClear = AccessPassword                                                            }
                                                         }
                                     })
                             }
                 });
 
-            AppSettings.hangfireSettings.ServicesHangfireURL = $"{AppSettings.ServicesAPIURL}/{AppSettings.ApplicationName}_hangfire";
+            return $"{apiurl}/{app.Environment.ApplicationName}_hangfire";
         }
     }
 }
