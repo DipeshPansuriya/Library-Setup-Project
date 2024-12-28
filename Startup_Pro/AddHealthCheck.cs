@@ -13,15 +13,15 @@ namespace InfraLib.Startup_Pro
             _ = builder.Services
                 .AddHealthChecks()
                 .AddSqlServer(
-                    @"Data Source=DIPESH-PANSURIY\SQLEXPRESS; Initial Catalog=masterdb; User Id=dbsa; Password=India_123456;MultipleActiveResultSets=True; Connection Timeout=300; TrustServerCertificate=true;Trusted_Connection=True",
+                    AppSettings.dbSettings.MastersDb,
                     healthQuery: "SELECT 1;",
                     name: "Masters Database")
                 .AddSqlServer(
-                    @"Data Source=DIPESH-PANSURIY\SQLEXPRESS; Initial Catalog=masterlogdb; User Id=dbsa; Password=India_123456;MultipleActiveResultSets=True; Connection Timeout=300; TrustServerCertificate=true;Trusted_Connection=True",
+                    AppSettings.dbSettings.MastersLogDb,
                     healthQuery: "SELECT 1;",
                     name: "Master Log Database")
                 .AddSqlServer(
-                    @"Data Source=DIPESH-PANSURIY\SQLEXPRESS; Initial Catalog=masterhangfiredb; User Id=dbsa; Password=India_123456;MultipleActiveResultSets=True; Connection Timeout=300; TrustServerCertificate=true;Trusted_Connection=True",
+                    AppSettings.dbSettings.MastersHangfireDb,
                     healthQuery: "SELECT 1;",
                     name: "Master Hangfire Database")
                 .AddHangfire(
